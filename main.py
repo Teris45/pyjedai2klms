@@ -1,8 +1,7 @@
 import json
 import sys
 import traceback
-import utils.minio_client as mc
-
+from utils.mclient import MinioClient
 
 # Here you may define the imports your tool needs...
 # import pandas as pd
@@ -30,7 +29,6 @@ def run(json):
 
     """
 
-    
     try:
         """
         Init a MinIO Client using the custom STELAR MinIO util file.
@@ -47,10 +45,12 @@ def run(json):
         minio_key = json['minio']['key']
         minio_skey = json['minio']['skey']
         minio_endpoint = json['minio']['endpoint_url']
-        #Init MinIO Client with acquired credentials from tool execution metadata
-        mclient = mc.init_client(minio_endpoint, minio_id, minio_key, minio_skey) 
-        ###############################################################################
+        
+        mc = MinioClient(minio_id, minio_key, minio_skey, minio_endpoint)
 
+        # It is strongly suggested to use the get_object and put_object methods of the MinioClient
+        # as they handle input paths provided by STELAR API appropriately. (S3 like paths)
+        ###############################################################################
 
 
         """
@@ -59,7 +59,7 @@ def run(json):
 
         An example of parameters for a tool that adds two numbers x,y could be:
         {
-            "input": {
+            "inputs": {
                 "any_name": [
                     "XXXXXXXX-bucket/temp1.csv",
                     "XXXXXXXX-bucket/temp2.csv"
@@ -69,7 +69,7 @@ def run(json):
                 ]
                 
             },
-            "output": {
+            "outputs": {
                 "correlations_file": "/path/to/write/the/file",
                 "log_file": "/path/to/write/the/file"
             },
@@ -107,12 +107,8 @@ def run(json):
                 - A client for MinIO acccess named 'mc' with method putObject(...) and getObject(...)
         """
 
-
-    
-
         ##### Tool Logic #####
         z=x+y
-
 
         """
             This json should contain any output of your tool that you consider valuable. Metrics field affects
@@ -124,7 +120,7 @@ def run(json):
 
             {
                 "message": "Tool executed successfully!",
-                "output": {
+                "outputs": {
                     "correlations_file": "XXXXXXXXX-bucket/2824af95-1467-4b0b-b12a-21eba4c3ac0f.csv",
                     "synopses_file": "XXXXXXXXX-bucket/21eba4c3ac0f.csv"			
                 }
@@ -138,7 +134,7 @@ def run(json):
         """
         json= {
                 'message': 'Tool Executed Succesfully',
-                'output': {}, 
+                'outputs': {}, 
                 'metrics': { 
                     'z': z, 
                 }, 

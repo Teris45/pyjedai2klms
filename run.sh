@@ -16,7 +16,7 @@ signature="$4"
 # Signature is used to gain access to any secret fields defined during the creation of the task.
 # Secret fields are not accessible without a valid signature.
 echo "[STELAR INFO] Performing cURL to the KLMS API to fetch input..."
-response=$(curl -s -L -X GET -H "Authorization: $token" "$endpoint_url/api/v2/tasks/$id/$signature/input")
+response=$(curl -s -L -X GET -H "Authorization: $token" "$endpoint_url/api/v2/task/$id/$signature/input")
 
 # Check if the curl request was successful
 success=$(echo "$response" | jq -r '.success')
@@ -33,8 +33,8 @@ printf "\n"
 # Store the "result" part into a file named "input.json"
 echo "$result" > input.json
 
-# Execute the tool
-python main.py input.json output.json
+# Execute the tool and force stdout to be unbuffered
+python -u main.py input.json output.json
 
 # Perform the second curl request with replacements and store the response in a variable
 output_json=$(<output.json)  # Read content of output.json file into a variable
@@ -45,7 +45,7 @@ echo "$output_json"
 # We will not be using token, as it may expire prior to tool completion.
 printf "\n"
 echo "[STELAR INFO] Performing cURL to the KLMS API to propagate output..."
-response=$(curl -s -X POST -H "Content-Type: application/json" "$endpoint_url/api/v2/tasks/$id/$signature/output" -d "$output_json")
+response=$(curl -s -X POST -H "Content-Type: application/json" "$endpoint_url/api/v2/task/$id/$signature/output" -d "$output_json")
 
 echo "[STELAR INFO] The output request to the KLMS API returned:"
 echo "$response"
